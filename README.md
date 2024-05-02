@@ -32,7 +32,7 @@ iface eth0 inet static
 	address 10.67.3.2
 	netmask 255.255.255.0
 	gateway 10.67.3.1
-    up echo nameserver 192.168.122.1 > /etc/resolv.conf
+        up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 - Georgopol : DNS Slave
@@ -42,7 +42,7 @@ iface eth0 inet static
 	address 10.67.2.2
 	netmask 255.255.255.0
 	gateway 10.67.2.1
-    up echo nameserver 192.168.122.1 > /etc/resolv.conf
+        up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 - Ruins : Client
@@ -52,7 +52,7 @@ iface eth0 inet static
 	address 10.67.2.4
 	netmask 255.255.255.0
 	gateway 10.67.2.1
-    up echo nameserver 192.168.122.1 > /etc/resolv.conf
+        up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 - Apartments : Client
@@ -62,7 +62,7 @@ iface eth0 inet static
 	address 10.67.2.5
 	netmask 255.255.255.0
 	gateway 10.67.2.1
-    up echo nameserver 192.168.122.1 > /etc/resolv.conf
+        up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 - MyIta : Load Balancer
@@ -72,7 +72,7 @@ iface eth0 inet static
 	address 10.67.2.3
 	netmask 255.255.255.0
 	gateway 10.67.2.1
-    up echo nameserver 192.168.122.1 > /etc/resolv.conf
+        up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 - Serverny : Web Server
@@ -82,7 +82,7 @@ iface eth0 inet static
 	address 10.67.1.2
 	netmask 255.255.255.0
 	gateway 10.67.1.1
-    up echo nameserver 192.168.122.1 > /etc/resolv.conf
+        up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 - Stalber : Web Server
@@ -92,7 +92,7 @@ iface eth0 inet static
 	address 10.67.1.3
 	netmask 255.255.255.0
 	gateway 10.67.1.1
-    up echo nameserver 192.168.122.1 > /etc/resolv.conf
+        up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 - Lipovka : Web Server
@@ -102,7 +102,7 @@ iface eth0 inet static
 	address 10.67.1.4
 	netmask 255.255.255.0
 	gateway 10.67.1.1
-    up echo nameserver 192.168.122.1 > /etc/resolv.conf
+        up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 ### Tambahkan ini di Erangel
