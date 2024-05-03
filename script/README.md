@@ -154,7 +154,7 @@ zone "siren.redzone.it07.com" {
     file "/etc/bind/it07/siren.redzone.it07.com";
     allow-transfer { 10.67.3.2; };
 };
-'
+' > /etc/bind/named.conf.local
 
 echo '
 ;
