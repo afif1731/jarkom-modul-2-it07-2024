@@ -573,6 +573,7 @@ lynx http://10.67.1.2:8080
 - Jalankan Keseluruhan No.12 di semua web-server (karena Serverny sudah, maka tinggal dikerjakan di Stalber dan Lipovka)
 
 - Kemudian Jalankan Command - command ini di setaip web-server
+
 ```
 a2enmod proxy
 a2enmod proxy_http
@@ -582,6 +583,7 @@ service apache2 restart
 ### Load balancer
 
 - Install dependensi dulu
+
 ```
 apt-get update
 apt-get install lynx apache2 php libapache2-mod-php7.0 nginx -y
@@ -590,6 +592,7 @@ apt-get install lynx apache2 php libapache2-mod-php7.0 nginx -y
 - buat file /etc/apache2/sites-available/jarkom-it07.conf
 
 - lalu masukkan
+
 ```
 <VirtualHost *:8080>
         <proxy balancer://itbalancer>
@@ -607,11 +610,13 @@ apt-get install lynx apache2 php libapache2-mod-php7.0 nginx -y
 ProxySet bytraffice berarti load-balancer menggunakan metode round robin
 
 - atur port tambahan. Tambahkan line berikut di /etc/apache2/ports.conf
+
 ```
 Listen 8080
 ```
 
 - Jalankan semua command berikut
+
 ```
 a2enmod proxy
 a2enmod proxy_http
@@ -622,11 +627,207 @@ a2enmod lbmethod_bytraffic
 - pindah direktori ke /etc/apache2/sites-available
 
 - lalu jalankan
+
 ```
 a2ensite jarkom-it07.conf
 ```
 
 - kembali ke root dan restart
+
 ```
 service apache2 restart
+```
+
+## No.14
+
+### Load Balancer
+
+instal juga di web worker sesuai kebutuhan
+
+- instalasi kebutuhan
+
+```
+apt-get update
+apt-get install dnsutils -y
+apt-get install lynx -y
+apt-get install nginx -y
+apt-get install apache2 -y
+apt-get install libapache2-mod-php7.0
+apt-get install wget -y
+apt-get install unzip -y
+apt-get install php -y
+apt-get install php-fpm -y
+```
+
+- atur port dengan menambahkan line berikut di /etc/apache2/ports.conf
+
+```
+Listen 8080
+```
+
+- Aktifkan konfigurasi
+
+```
+a2ensite jarkom-it07.conf
+```
+
+- Restart apache
+
+```
+service apache2 restart
+```
+
+- Matikan apache
+
+```
+service apache2 stop
+```
+
+- jalankan nginx
+
+```
+service nginx start
+```
+
+- masukan konfigurasi load balancer ke /etc/nginx/sites-available/jarkom-it07
+
+```
+upstream myita {
+    server 10.67.1.3:8001; #stabler
+    server 10.67.1.2:8002; #serverny
+    server 10.67.1.4:8003; #lipvoka
+}
+
+server {
+  listen 80;
+  server_name 10.67.2.3;
+
+  location / {
+    proxy_pass http://myita;
+  }
+}
+```
+
+- Menajalankan symlink
+
+```
+ln -s /etc/nginx/sites-available/jarkom-it07 /etc/nginx/sites-enabled
+```
+
+- Menghapus default pada nginx agar tidak terjadi konflik
+
+```
+rm /etc/nginx/sites-enabled/default
+```
+
+- Menjalankan nginx
+
+```
+service nginx restart
+```
+
+### Web Worker
+
+- atur port dengan menambahkan line berikut di /etc/apache2/ports.conf
+
+```
+Listen 8080
+```
+
+- Aktifkan konfigurasi
+
+```
+a2ensite jarkom-it07.conf
+```
+
+- Restart apache
+
+```
+service apache2 restart
+```
+
+- Matikan apache
+
+```
+service apache2 stop
+```
+
+- jalankan nginx
+
+```
+service nginx start
+```
+
+- masukan index.php di /var/www/jarkom-it07
+
+```
+mkdir /var/www/jarkom-it07
+
+<?php
+$hostname = gethostname();
+$date = date('Y-m-d H:i:s');
+$php_version = phpversion();
+$username = get_current_user();
+
+
+
+echo "Hello World!<br>";
+echo "Saya adalah: $username<br>";
+echo "Saat ini berada di: $hostname<br>";
+echo "Versi PHP yang saya gunakan: $php_version<br>";
+echo "Tanggal saat ini: $date<br>";
+?>
+```
+
+- buat konfigurasi di /etc/nginx/sites-available/jarkom-it07
+
+```
+server {
+
+    listen 8080;
+
+    root /var/www/jarkom-it07;
+
+    index index.php index.html index.htm;
+    server_name _;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    # pass PHP scripts to FastCGI server
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+    }
+
+    location ~ /\.ht {
+     deny all;
+    }
+
+    error_log /var/log/nginx/jarkom-it07_error.log;
+    access_log /var/log/nginx/jarkom-it07_access.log;
+}
+```
+
+- Menajalankan symlink
+
+```
+ln -s /etc/nginx/sites-available/jarkom-it07 /etc/nginx/sites-enabled
+```
+
+- Menghapus default pada nginx agar tidak terjadi konflik
+
+```
+rm /etc/nginx/sites-enabled/default
+```
+
+- Menjalankan nginx
+
+```
+service nginx restart
+```
+
+```
+service php7.0-fpm start
 ```
