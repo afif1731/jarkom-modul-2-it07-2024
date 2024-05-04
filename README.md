@@ -329,19 +329,19 @@ Invert DNS nda usah
 ```
 zone "airdrop.it07.com" {
     type slave;
-    masters { 10.67.3.2; }; # IP Yudhistira
+    masters { 10.67.3.2; };
     file "/etc/bind/it07/slave.airdrop.it07.com";
 };
 
 zone "redzone.it07.com" {
     type slave;
-    masters { 10.67.3.2; }; # IP Yudhistira
+    masters { 10.67.3.2; };
     file "/etc/bind/it07/slave.redzone.it07.com";
 };
 
 zone "loot.it07.com" {
     type slave;
-    masters { 10.67.3.2; }; # IP Yudhistira
+    masters { 10.67.3.2; };
     file "/etc/bind/it07/slave.loot.it07.com";
 };
 ```
@@ -564,4 +564,69 @@ echo "Tanggal saat ini: $date<br>";
 
 ```
 lynx http://10.67.1.2:8080
+```
+
+## No.13
+
+### Web-server
+
+- Jalankan Keseluruhan No.12 di semua web-server (karena Serverny sudah, maka tinggal dikerjakan di Stalber dan Lipovka)
+
+- Kemudian Jalankan Command - command ini di setaip web-server
+```
+a2enmod proxy
+a2enmod proxy_http
+service apache2 restart
+```
+
+### Load balancer
+
+- Install dependensi dulu
+```
+apt-get update
+apt-get install lynx apache2 php libapache2-mod-php7.0 nginx -y
+```
+
+- buat file /etc/apache2/sites-available/jarkom-it07.conf
+
+- lalu masukkan
+```
+<VirtualHost *:8080>
+        <proxy balancer://itbalancer>
+                BalancerMember http://10.67.1.2:8080
+                BalancerMember http://10.67.1.3:8080
+                BalancerMember http://10.67.1.4:8080
+                ProxySet lbmethod=bytraffic
+        </proxy>
+        ProxyPreserveHost On
+        ProxyPass / balancer://itbalancer/
+        ProxyPassReverse / balancer://itbalancer/
+</VirtualHost>
+```
+
+ProxySet bytraffice berarti load-balancer menggunakan metode round robin
+
+- atur port tambahan. Tambahkan line berikut di /etc/apache2/ports.conf
+```
+Listen 8080
+```
+
+- Jalankan semua command berikut
+```
+a2enmod proxy
+a2enmod proxy_http
+a2enmod proxy_balancer
+a2enmod lbmethod_bytraffic
+```
+
+- pindah direktori ke /etc/apache2/sites-available
+
+- lalu jalankan
+```
+a2ensite jarkom-it07.conf
+```
+
+- kembali ke root dan restart
+```
+service apache2 restart
 ```
