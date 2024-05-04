@@ -1,3 +1,15 @@
+## Client
+
+- `client-script.sh`
+```
+echo nameserver 192.168.122.1 > /etc/resolv.conf
+
+apt-get update
+apt-get install lynx -y
+
+echo nameserver 10.67.3.2 > /etc/resolv.conf
+```
+
 ## Pochinki
 
 ### Pastikan option.conf sudah ada di root
