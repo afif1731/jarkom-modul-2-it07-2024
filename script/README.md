@@ -280,6 +280,8 @@ echo "Tanggal saat ini: $date<br>";
 
 - `web_server-script.sh`
 ```
+echo nameserver 192.168.122.1 > /etc/resolv.conf
+
 apt-get update
 apt-get install lynx apache2 php libapache2-mod-php7.0 nginx -y
 
@@ -329,6 +331,8 @@ service apache2 restart
 
 - `load_balancer-script.sh`
 ```
+echo nameserver 192.168.122.1 > /etc/resolv.conf
+
 apt-get update
 apt-get install lynx apache2 php libapache2-mod-php7.0 nginx -y
 
