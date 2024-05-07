@@ -920,4 +920,79 @@ ip_hash;
 hash $request_uri consistent;
 ```
 
-## No. 16
+## No. 16 dan 18
+
+### di pochinki
+
+- tambahkan ini pada /etc/bind/named.conf.local
+```
+one "myIta.it07.com" {
+    type master;
+    file "/etc/bind/it07/myIta.it07.com";
+};
+
+zone "2.67.10.in-addr.arpa" {
+        type master;
+        notify yes;
+        also-notify { 10.67.2.2; };
+        allow-transfer { 10.67.2.2; };
+        file "/etc/bind/it07/2.67.10.in-addr.arpa";
+};
+```
+
+- ini pada /etc/bind/it07/myIta.it07.com
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     myIta.it07.com. root.myIta.it07.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@             IN      NS      myIta.it07.com.
+@             IN      A       10.67.2.3 ; IP myIta
+www           IN      CNAME   myIta.it07.com.
+```
+
+- ini pada /etc/bind/it07/2.67.10.in-addr.arpa
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     myIta.it07.com. root.myIta.it07.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+; PTR Records
+2.67.10.in-addr.arpa.    IN      NS      myIta.it07.com.
+3                        IN      PTR     www.myIta.it07.com.
+```
+
+## No. 17
+
+- masukkan pada nginx myIta
+```
+upstream myita {
+    server 10.67.1.3:8080; #stabler
+    server 10.67.1.2:8080; #serverny
+    server 10.67.1.4:8080; #lipvoka
+}
+
+server {
+  listen 14000;
+  listen 14400;
+  server_name 10.67.2.3;
+
+  location / {
+    proxy_pass http://myita;
+  }
+}
+" > /etc/nginx/sites-available/jarkom-it07
+```
