@@ -831,3 +831,93 @@ service nginx restart
 ```
 service php7.0-fpm start
 ```
+
+## No. 15
+
+### Client
+
+- pastikan install apache benchmark
+```
+apt-get install apache2-utils
+```
+
+- Jalankan perintah ini
+```
+ab -n 200 -c 10 http://10.67.2.3/
+```
++ `n`: jumlah request yang akan dikirim
++ `c`: concurrency, jumlah request dalam satu pengiriman
+
+```
+This is ApacheBench, Version 2.3 <$Revision: 1706008 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 10.67.2.3 (be patient)
+Completed 100 requests
+Completed 200 requests
+Finished 200 requests
+
+
+Server Software:        nginx/1.10.3
+Server Hostname:        10.67.2.3
+Server Port:            80
+
+Document Path:          /
+Document Length:        167 bytes
+
+Concurrency Level:      10
+Time taken for tests:   0.189 seconds
+Complete requests:      200
+Failed requests:        133
+   (Connect: 0, Receive: 0, Length: 133, Exceptions: 0)
+Total transferred:      62467 bytes
+HTML transferred:       33267 bytes
+Requests per second:    1056.36 [#/sec] (mean)
+Time per request:       9.466 [ms] (mean)
+Time per request:       0.947 [ms] (mean, across all concurrent requests)
+Transfer rate:          322.20 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1    2   0.8      2       6
+Processing:     5    7   1.4      7      12
+Waiting:        5    7   1.4      7      12
+Total:          7    9   1.5      9      15
+
+Percentage of the requests served within a certain time (ms)
+  50%      9
+  66%      9
+  75%     10
+  80%     10
+  90%     12
+  95%     14
+  98%     14
+  99%     14
+ 100%     15 (longest request)
+```
+
+- Simpan hasilnya
+- Ubah Load balancer pada `myIta`, lalu jalankan command yang sama lagi
+
+- Round-Robin
+```
+# nda perlu tambahkan apa-apa
+```
+
+- Least-connection
+```
+least_conn;
+```
+
+- IP Hash
+```
+ip_hash;
+```
+
+- Generic Hash
+```
+hash $request_uri consistent;
+```
+
+## No. 16

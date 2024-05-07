@@ -6,7 +6,7 @@
 echo nameserver 192.168.122.1 > /etc/resolv.conf
 
 apt-get update
-apt-get install lynx -y
+apt-get install lynx apache2-utils -y
 
 echo nameserver 10.67.3.2 > /etc/resolv.conf
 ```
@@ -559,35 +559,71 @@ ln -s /etc/nginx/sites-available/jarkom-it07 /etc/nginx/sites-enabled
 service nginx restart
 ```
 
-## MyIta No. 16-18
+## pochinki No. 16-18
 
-- myita1618-script.sh
+- pochinki1618-script.sh
 ```
 echo nameserver 192.168.122.1 > /etc/resolv.conf
-
-apt-get update
-apt-get install bind9 ufw -y
-
-echo nameserver 10.67.3.2 > /etc/resolv.conf
-
-mkdir /etc/bind/it07
 
 echo '
 zone "myIta.it07.com" {
     type master;
     file "/etc/bind/it07/myIta.it07.com";
 };
-' > /etc/bind/named.conf.local
+
+zone "2.67.10.in-addr.arpa" {
+        type master;
+        notify yes;
+        also-notify { 10.67.2.2; };
+        allow-transfer { 10.67.2.2; };
+        file "/etc/bind/it07/2.67.10.in-addr.arpa";
+};
+' >> /etc/bind/named.conf.local
 
 echo '
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    server_name _;
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     myIta.it07.com. root.myIta.it07.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@             IN      NS      myIta.it07.com.
+@             IN      A       10.67.2.3 ; IP myIta
+www           IN      CNAME   myIta.it07.com.
 
-    return 301 http://www.myIta.it07.com$request_uri;
-}
+' > /etc/bind/it07/myIta.it07.com
 
+echo '
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     myIta.it07.com. root.myIta.it07.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+; PTR Records
+2.67.10.in-addr.arpa.    IN      NS      myIta.it07.com.
+3                        IN      PTR     www.myIta.it07.com.
+
+' > /etc/bind/it07/2.67.10.in-addr.arpa
+
+service bind9 restart
+
+```
+
+## myita dan pochinki No. 17
+
+- myita17-script.sh
+```
+echo "
 upstream myita {
     server 10.67.1.3:8080; #stabler
     server 10.67.1.2:8080; #serverny
@@ -595,21 +631,15 @@ upstream myita {
 }
 
 server {
-  listen 80;
-  server_name www.myIta.it07.com myIta.it07.com;
+  listen 14000;
+  listen 14400;
+  server_name 10.67.2.3;
 
   location / {
     proxy_pass http://myita;
   }
 }
-' > /etc/nginx/sites-available/jarkom-it07
-
-ln -s /etc/nginx/sites-available/jarkom-it07 /etc/nginx/sites-enabled
+" > /etc/nginx/sites-available/jarkom-it07
 
 service nginx restart
-service bind9 restart
-
-ufw allow 14000
-ufw allow 14400
-ufw enable
 ```
