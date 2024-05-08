@@ -643,3 +643,82 @@ server {
 
 service nginx restart
 ```
+
+## WebServer No. 19
+
+- Pilih satu, ini pake nginx
+```
+apt-get install wget unzip -y
+
+wget -O dirlist.zip --no-check-certificate -r 'https://drive.google.com/uc?export=download&id=11S6CzcvLG-dB0ws1yp494IURnDvtIOcq'
+
+unzip dirlist.zip
+
+rm -rf __MACOSX/
+
+cp -a worker2/ /var/www/jarkom-it07/
+
+echo '
+server {
+
+    listen 8080;
+
+    root /var/www/jarkom-it07;
+
+    index index.php index.html index.htm;
+    server_name _;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~/worker2 {
+        autoindex on;
+    }
+
+    # pass PHP scripts to FastCGI server
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+    }
+
+    location ~ /\.ht {
+     deny all;
+    }
+
+    error_log /var/log/nginx/jarkom-it07_error.log;
+    access_log /var/log/nginx/jarkom-it07_access.log;
+}
+' > /etc/nginx/sites-available/jarkom-it07
+
+service nginx restart
+```
+
+## Pochinki No.20
+```
+echo '
+zone "tamat.it07.com" {
+        type master;
+        file "/etc/bind/it07/tamat.it07.com";
+};
+' >> /etc/bind/named.conf.local
+
+echo '
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     tamat.it07.com. root.tamat.it07.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@             IN      NS      tamat.it07.com.
+@             IN      A       10.67.1.4 ; IP worker dari no19
+www           IN      CNAME   tamat.it07.com.
+' > /etc/bind/it07/tamat.it07.com
+
+service bind9 restart
+```

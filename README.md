@@ -1,15 +1,23 @@
-# Lapres Kelompok IT07
+# Laporan Resmi Praktikum Jarkom Modul 2 - Kelompok IT07
 
-| Anggota           | NRP        |
-| ----------------- | ---------- |
-| Muhammad Afif     | 5027221032 |
+| Nama | NRP |
+| ---- | --- |
+| Muhammad Afif | 5027221032 |
 | Alma Amira Dewani | 5027221054 |
 
-## Topologi
+Praktikum modul 2 jarkom terdiri dari 20 soal yang dikerjakan seluruhnya menggunakan `VM GNS3`. Ketentuan tambahannya adalah node ubuntu untuk praktikum ini harus menggunakan docker image `kuuhaku86/gns3-ubuntu:1.0.1`.
 
-![topologi](./img/topologi.png)
+Berikut merupakan cara penyelesaian modul oleh kelompok IT07. Penyelesaian dilakukan hingga nomor 18, nomor 19 dan 20 ditambahkan pada bagian revisi karena dalam pengerjaan kelompok IT07 hanya mencapai nomor 18 dan nomor sisanya diselesaikan di luar waktu praktikum.
 
 ## No.1
+
+Untuk membantu pertempuran di Erangel, kamu ditugaskan untuk membuat jaringan komputer yang akan digunakan sebagai alat komunikasi. Sesuaikan rancangan Topologi dengan rancangan dan pembagian yang berada di link yang telah disediakan
+
+### Topologi :
+
+![topologi](./pictures/02.png)
+
+Dari topologi yang telah dibuat, dilakukan konfigurasi pada setiap node seperti berikut
 
 ### GNS3 Network Configuration
 
@@ -123,24 +131,33 @@ iface eth0 inet static
         up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
-### Tambahkan ini di Erangel
+### Pengaturan tambahan pada Erangel
 
+Agar dapat tersambung pada internet, ditambahkan command berikut pada file `.bashrc` yang ada pada node Erangel
+
+- `/root/.bashrc`
 ```
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 10.67.0.0/16
 ```
 
 ## No.2
 
-### Script
+Karena para pasukan membutuhkan koordinasi untuk mengambil airdrop, maka buatlah sebuah domain yang mengarah ke Stalber dengan alamat airdrop.xxxx.com dengan alias www.airdrop.xxxx.com dimana xxxx merupakan kode kelompok. Contoh : airdrop.it01.com
 
-- /root/script.sh
+### Install dependensi di Pochinki
+
+Sebelum pengerjaan dilakukan, diperlukan penginstallan `bind9` pada DNS master
+
+- terminal
 
 ```
 apt-get update
 apt-get install dnsutils bind9 -y
 ```
 
-### Config
+### Konfigurasi named.conf.local
+
+Inisiasi untuk `airdrop.it07.com` dimasukkan pada file bind
 
 - /etc/bind/named.conf.local
 
@@ -151,19 +168,9 @@ zone "airdrop.it07.com" {
 };
 ```
 
-### Sebelum config DNS, selalu lakukan
+### Konfigurasi Zone
 
-```
-cp /etc/bind/db.local /etc/bind/it07/name.it07.com
-```
-
-### Setelah config, restart pakai
-
-```
-service bind9 restart
-```
-
-### Config DNS
+buat direktori `it07` pada direktori bind melalui `mkdir /etc/bind/it07` lalu buat file `airdrop.it07.com` yang akan diisi oleh konfigurasi zone airdrop.
 
 - /etc/bind/it07/airdrop.it07.com
 
@@ -180,41 +187,43 @@ $TTL    604800
                          604800 )       ; Negative Cache TTL
 ;
 @             IN      NS      airdrop.it07.com.
-@             IN      A       10.67.1.3 ; IP airdrop
+@             IN      A       10.67.1.3 ; IP Stalber
 www           IN      CNAME   airdrop.it07.com.
 ```
-
-- Ubah nameserver client Ruins ke Pochinki
-
-```
-#nameserver 192.168.122.1
-nameserver 10.67.3.2
-```
-
-- testing di Ruins
+Restart service bind9 agar konfigurasi zone yang dilakukan dapat berjalan
 
 ```
-ping airdrop.it07.com
+service bind9 restart
 ```
 
-- Ubah nameserver client Apartments ke Pochinki
+### Untuk pengujian, masuk ke salah satu terminal node client
+
+Agar DNS yang telah dikonfigurasi dapat dijalankan, ubah nameserver pada node client menjadi `IP dari Pochinki`
+
+- Ubah nameserver client Ruins dan Apartments ke Pochinki
 
 ```
 #nameserver 192.168.122.1
 nameserver 10.67.3.2
 ```
 
-- testing di Apartments
+- lakukan testing di Ruins dan Apartments
 
 ```
 ping airdrop.it07.com
 ```
+
+- Hasilnya adalah command ping berhasil mengirim request pada `IP Stalber`
+
+![ping ke airdrop](./pictures/no2_1.png)
 
 ## No.3
 
-Mirip No. 2 cuma beda nama
+Para pasukan juga perlu mengetahui mana titik yang sedang di bombardir artileri, sehingga dibutuhkan domain lain yaitu redzone.xxxx.com dengan alias www.redzone.xxxx.com yang mengarah ke Severny
 
-### Config DNS
+### Konfigurasi DNS
+
+lakukan perubahan pada file `named.conf.local` untuk melakukan inisiasi zone redzone. Tambahkan teks berikut pada file
 
 - /etc/bind/named.conf.local
 
@@ -224,6 +233,8 @@ zone "redzone.it07.com" {
         file "/etc/bind/it07/redzone.it07.com";
 };
 ```
+
+Buat file `redzone.it07.com` pada direktori it07 yang telah dibuat pada no. 2 lalu masukkan teks berikut pada file
 
 - /etc/bind/it07/redzone.it07.com
 
@@ -244,11 +255,19 @@ $TTL    604800
 www           IN      CNAME   redzone.it07.com.
 ```
 
+### Untuk pengujian, masuk ke salah satu terminal node client
+
+lakukan ping pada `redzone.it07.com` dan `www.redzone.it07.com`. Hasilnya adalah seperti berikut
+
+![ping redzone](./pictures/no3_1.png)
+
 ## No.4
 
-Mirip No. 2 cuma beda nama
+Markas pusat meminta dibuatnya domain khusus untuk menaruh informasi persenjataan dan suplai yang tersebar. Informasi persenjataan dan suplai tersebut mengarah ke Mylta dan domain yang ingin digunakan adalah loot.xxxx.com dengan alias www.loot.xxxx.com
 
-### Config DNS
+### Konfigurasi DNS
+
+lakukan perubahan pada file `named.conf.local` untuk melakukan inisiasi zone loot. Tambahkan teks berikut pada file
 
 - /etc/bind/named.conf.local
 
@@ -258,6 +277,8 @@ zone "loot.it07.com" {
         file "/etc/bind/it07/loot.it07.com";
 };
 ```
+
+Buat file `loot.it07.com` pada direktori it07 yang telah dibuat pada no. 2 lalu masukkan teks berikut pada file
 
 - /etc/bind/it07/loot.it07.com
 
@@ -278,13 +299,37 @@ $TTL    604800
 www           IN      CNAME   loot.it07.com.
 ```
 
+### Untuk pengujian, masuk ke salah satu terminal node client
+
+lakukan ping pada `loot.it07.com` dan `www.loot.it07.com`. Hasilnya adalah seperti berikut
+
+![ping loot](./pictures/no4_1.png)
+
 ## No. 5
 
-Tinggal tes dari Apartments sama Ruins
+Pastikan domain-domain tersebut dapat diakses oleh seluruh komputer (client) yang berada di Erangel
+
+### Ujicoba pada Ruins dan Apartments
+
+Ketika melakukan pengujian pada client, pastikan nameserver sudah mengarah pada DNS Master (Pochinki)
+
+- /etc/resolv.conf
+```
+#nameserver 192.168.122.1
+nameserver 10.67.3.2
+```
+
+- sebelumnya telah dilakukan pengujian pada `Ruins`, sekarang juda dilakukan pengujian pada `Apartments`
+
+![ping di apartments](./pictures/no5_1.png)
 
 ## No. 6
 
-### Config Reverse DNS
+Beberapa daerah memiliki keterbatasan yang menyebabkan hanya dapat mengakses domain secara langsung melalui alamat IP domain tersebut. Karena daerah tersebut tidak diketahui secara spesifik, pastikan semua komputer (client) dapat mengakses domain redzone.xxxx.com melalui alamat IP Severny (Notes : menggunakan pointer record)
+
+### Konfigurasi Reverse DNS
+
+lakukan perubahan pada file `named.conf.local` untuk melakukan inisiasi zone reverse ip Serverny. Tambahkan teks berikut pada file
 
 - /etc/bind/named.conf.local
 
@@ -295,8 +340,9 @@ zone "1.67.10.in-addr.arpa" {
 };
 ```
 
-- /etc/bind/it07/1.67.10.in-addr.arpa
+Buat file `1.67.10.in-addr.arpa` pada direktori it07 yang telah dibuat pada no. 2 lalu masukkan teks berikut pada file
 
+- /etc/bind/it07/1.67.10.in-addr.arpa
 ```
 ;
 ; BIND data file for local loopback interface
@@ -313,28 +359,50 @@ $TTL    604800
 2                        IN      PTR     redzone.it07.com.
 ```
 
-### Periksa melalui
+### Pengujian pada Ruins dan Apartments
 
+jalankan perintah berikut untuk melihat arah pointer dari IP Serverny
+
+- terminal client
 ```
 host -t PTR 10.67.1.2
 ```
 
+Apabila berhasil, maka tampilannya adalah seperti berikut
+
+![host PTR](./pictures/no6_1.png)
+
 ## No.7
 
-- Tambahkan di semua zone /etc/bind/named.conf.local
+Akhir-akhir ini seringkali terjadi serangan siber ke DNS Server Utama, sebagai tindakan antisipasi kamu diperintahkan untuk membuat DNS Slave di Georgopol untuk semua domain yang sudah dibuat sebelumnya
 
-```
-notify yes;
-        also-notify { 10.67.2.2; };
-        allow-transfer { 10.67.2.2; };
-```
+### Menambahkan konfigurasi pada Pochinki
 
-Invert DNS nda usah
-
-### Config di Georgopol
+Tambahkan baris berikut pada semua zone
 
 - /etc/bind/named.conf.local
+```
+notify yes;
+also-notify { 10.67.2.2; };
+allow-transfer { 10.67.2.2; };
+```
 
+- Contoh pada salah satu zone
+```
+zone "1.67.10.in-addr.arpa" {
+        type master;
+        notify yes;
+        also-notify { 10.67.2.2; };
+        allow-transfer { 10.67.2.2; };
+        file "/etc/bind/it07/1.67.10.in-addr.arpa";
+};
+```
+
+### Konfigurasi pada di Georgopol
+
+Install `bind9` pada node Georgopol lalu ubah isi file /etc/bind/named.conf.local untuk melakukan inisiasi DNS Slave
+
+- /etc/bind/named.conf.local
 ```
 zone "airdrop.it07.com" {
     type slave;
@@ -353,7 +421,17 @@ zone "loot.it07.com" {
     masters { 10.67.3.2; };
     file "/etc/bind/it07/slave.loot.it07.com";
 };
+
+zone "1.67.10.in-addr.arpa" {
+        type master;
+        notify yes;
+        also-notify { 10.67.2.2; };
+        allow-transfer { 10.67.2.2; };
+        file "/etc/bind/it07/1.67.10.in-addr.arpa";
+};
 ```
+
+kemudian buat direktori it07 pada direktori /etc/bind yang isinya sama seperti pada DNS master
 
 - /etc/bind/it07/slave.airdrop.it07.com
 
@@ -412,33 +490,88 @@ $TTL    604800
 www           IN      CNAME   loot.it07.com.
 ```
 
+- /etc/bind/it07/1.67.10.in-addr.arpa
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     redzone.it07.com. root.redzone.it07.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+; PTR Records
+1.67.10.in-addr.arpa.    IN      NS      redzone.it07.com.
+2                        IN      PTR     redzone.it07.com.
+```
+
+### Pengujian pada client Ruins dan Apartments
+
+Ubah nameserver pada cilent menjadi ip dari Georgopol untuk mensimulasikan bahwa Pochinki sedang down
+
+```
+#nameserver 192.168.122.1
+#nameserver 10.67.3.2
+nameserver 10.67.2.2
+```
+
+lalu jalankan ping pada domain yang sama, hasilnya adalah seperti berikut
+
+![ping 7](./pictures/no7_1.png)
+
 ## No.8
+Kamu juga diperintahkan untuk membuat subdomain khusus melacak airdrop berisi peralatan medis dengan subdomain medkit.airdrop.xxxx.com yang mengarah ke Lipovka
 
-- tambahkan di /etc/bind/it07/airdrop.it07.com
+### Tambahan konfigurasi pada /etc/bind/it07/airdrop.it07.com
 
+Tambahkan konfigurasi untuk sobdomain medkit pada `airdrop.it07.com`
+- /etc/bind/it07/airdrop.it07.com
 ```
 medkit        IN      A       10.67.1.4
 www.medkit    IN      CNAME   medkit.airdrop.it07.com.
 ```
 
+### Pengujian pada client
+
+Jalankan `ping medkit.airdrop.it07.com` dan `ping www.medkit.airdrop.it07.com`, hasilnya adalah sebagai berikut
+
+![ping medkit](./pictures/no8_1.png)
+
 ## No.9
 
-#### Di Pochinki
+Terkadang red zone yang pada umumnya di bombardir artileri akan dijatuhi bom oleh pesawat tempur. Untuk melindungi warga, kita diperlukan untuk membuat sistem peringatan air raid dan memasukkannya ke subdomain siren.redzone.xxxx.com dalam folder siren dan pastikan dapat diakses secara mudah dengan menambahkan alias www.siren.redzone.xxxx.com dan mendelegasikan subdomain tersebut ke Georgopol dengan alamat IP menuju radar di Severny
 
-- tambahkan ini di /etc/bind/it07/redzone.it07.com
+#### Tambahan konfigurasi pada /etc/bind/it07/redzone.it07.com
+
+Tambahkan konfigurasi untuk delegasi subdomain pada Pochinki yang mengarah ke Georgopol
+
+- /etc/bind/it07/redzone.it07.com
 
 ```
 ns1           IN      A       10.67.2.2 ; IP Georgopol
 siren         IN      NS      ns1
 ```
 
-- tambahkan ini di /etc/bind/named.conf.options
+Agar delegasi dapat memngirimkan query yang terpasang pada domain, maka perlu ditambahkan opsi allow-query
+
+- /etc/bind/named.conf.options
 
 ```
 allow-query{any;};
 ```
 
-#### Di Georgopol
+Pastikan juga forwarders pada `named.conf.options` tidak aktif
+```
+//forwarders {
+//    0.0.0.0;
+//};
+```
+
+#### Konfigurasi pada Georgopol
+
+Tambahkan zone siren.redzone yang menerima transfer dari Pochinki
 
 - /etc/bind/named.conf.local
 
@@ -449,6 +582,8 @@ zone "siren.redzone.it07.com" {
     allow-transfer { 10.67.3.2; };
 };
 ```
+
+Buat juga file `siren.redzone.it07.com`
 
 - /etc/bind/it07/siren.redzone.it07.com
 
@@ -469,6 +604,10 @@ $TTL    604800
 @           IN      A       10.67.1.2
 www         IN      CNAME   siren.redzone.it07.com.
 ```
+
+### Pengujian pada client
+
+![ping siren](./pictures/no9_1.png)
 
 ## No. 10
 
@@ -978,3 +1117,17 @@ server {
 }
 " > /etc/nginx/sites-available/jarkom-it07
 ```
+
+# Revisi
+
+## No.15
+
+Sebelumnya, IT07 mengalami salah pemahaman pada soal yang menyebabkan pengujian website menggunakan apache benchmark hanya dilakukan pada nginx. Pada revisi ini, laporan pengujian telah ditambahkan pada web server apache2. Laporan dapat diakses melalui [link ini](https://docs.google.com/document/d/1rsLhPZcboGSeD-4F5tlF4qKTCWgRor3E-LaF7eXnQk0/edit?usp=sharing)
+
+## No. 19
+
+Berikut merupakan penyelesaian Soal Nomor 19 yang sebelumnya tidak sempat dikerjakan
+
+## No. 20
+
+Berikut merupakan penyelesaian Soal Nomor 20 yang sebelumnya tidak sempat dikerjakan
