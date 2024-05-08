@@ -1,8 +1,8 @@
 # Laporan Resmi Praktikum Jarkom Modul 2 - Kelompok IT07
 
-| Nama | NRP |
-| ---- | --- |
-| Muhammad Afif | 5027221032 |
+| Nama              | NRP        |
+| ----------------- | ---------- |
+| Muhammad Afif     | 5027221032 |
 | Alma Amira Dewani | 5027221054 |
 
 Praktikum modul 2 jarkom terdiri dari 20 soal yang dikerjakan seluruhnya menggunakan `VM GNS3`. Ketentuan tambahannya adalah node ubuntu untuk praktikum ini harus menggunakan docker image `kuuhaku86/gns3-ubuntu:1.0.1`.
@@ -136,6 +136,7 @@ iface eth0 inet static
 Agar dapat tersambung pada internet, ditambahkan command berikut pada file `.bashrc` yang ada pada node Erangel
 
 - `/root/.bashrc`
+
 ```
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 10.67.0.0/16
 ```
@@ -190,6 +191,7 @@ $TTL    604800
 @             IN      A       10.67.1.3 ; IP Stalber
 www           IN      CNAME   airdrop.it07.com.
 ```
+
 Restart service bind9 agar konfigurasi zone yang dilakukan dapat berjalan
 
 ```
@@ -314,6 +316,7 @@ Pastikan domain-domain tersebut dapat diakses oleh seluruh komputer (client) yan
 Ketika melakukan pengujian pada client, pastikan nameserver sudah mengarah pada DNS Master (Pochinki)
 
 - /etc/resolv.conf
+
 ```
 #nameserver 192.168.122.1
 nameserver 10.67.3.2
@@ -343,6 +346,7 @@ zone "1.67.10.in-addr.arpa" {
 Buat file `1.67.10.in-addr.arpa` pada direktori it07 yang telah dibuat pada no. 2 lalu masukkan teks berikut pada file
 
 - /etc/bind/it07/1.67.10.in-addr.arpa
+
 ```
 ;
 ; BIND data file for local loopback interface
@@ -364,6 +368,7 @@ $TTL    604800
 jalankan perintah berikut untuk melihat arah pointer dari IP Serverny
 
 - terminal client
+
 ```
 host -t PTR 10.67.1.2
 ```
@@ -381,6 +386,7 @@ Akhir-akhir ini seringkali terjadi serangan siber ke DNS Server Utama, sebagai t
 Tambahkan baris berikut pada semua zone
 
 - /etc/bind/named.conf.local
+
 ```
 notify yes;
 also-notify { 10.67.2.2; };
@@ -388,6 +394,7 @@ allow-transfer { 10.67.2.2; };
 ```
 
 - Contoh pada salah satu zone
+
 ```
 zone "1.67.10.in-addr.arpa" {
         type master;
@@ -403,6 +410,7 @@ zone "1.67.10.in-addr.arpa" {
 Install `bind9` pada node Georgopol lalu ubah isi file /etc/bind/named.conf.local untuk melakukan inisiasi DNS Slave
 
 - /etc/bind/named.conf.local
+
 ```
 zone "airdrop.it07.com" {
     type slave;
@@ -491,6 +499,7 @@ www           IN      CNAME   loot.it07.com.
 ```
 
 - /etc/bind/it07/1.67.10.in-addr.arpa
+
 ```
 ;
 ; BIND data file for local loopback interface
@@ -522,12 +531,15 @@ lalu jalankan ping pada domain yang sama, hasilnya adalah seperti berikut
 ![ping 7](./pictures/no7_1.png)
 
 ## No.8
+
 Kamu juga diperintahkan untuk membuat subdomain khusus melacak airdrop berisi peralatan medis dengan subdomain medkit.airdrop.xxxx.com yang mengarah ke Lipovka
 
 ### Tambahan konfigurasi pada /etc/bind/it07/airdrop.it07.com
 
 Tambahkan konfigurasi untuk sobdomain medkit pada `airdrop.it07.com`
+
 - /etc/bind/it07/airdrop.it07.com
+
 ```
 medkit        IN      A       10.67.1.4
 www.medkit    IN      CNAME   medkit.airdrop.it07.com.
@@ -563,6 +575,7 @@ allow-query{any;};
 ```
 
 Pastikan juga forwarders pada `named.conf.options` tidak aktif
+
 ```
 //forwarders {
 //    0.0.0.0;
@@ -750,7 +763,7 @@ service apache2 restart
 
 ### Load balancer
 
-- Install dependensi dulu
+- Install dependensi
 
 ```
 apt-get update
@@ -807,6 +820,14 @@ service apache2 restart
 ```
 
 ### Output
+
+![nomor13.2](./img/no13-2.png)
+
+![nomor13.4](./img/no13-4.png)
+
+![nomor13.1](./img/no13-1.png)
+
+![nomor13.5](./img/no.13-5.png)
 
 ## No.14
 
@@ -866,6 +887,7 @@ service nginx restart
 
 ### Web Worker
 
+- Pastikan sudah menginstall dependensi
 - Pastikan sudah mensetting port 8080
 - Pastikan juga sudah menambahkan index.php di /var/www/jarkom-it07
 
