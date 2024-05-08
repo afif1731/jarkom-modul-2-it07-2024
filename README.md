@@ -1174,6 +1174,69 @@ Sebelumnya, IT07 mengalami salah pemahaman pada soal yang menyebabkan pengujian 
 
 Berikut merupakan penyelesaian Soal Nomor 19 yang sebelumnya tidak sempat dikerjakan
 
+### Soal
+
+Karena probset sudah kehabisan ide masuk ke salah satu worker buatkan akses direktori listing yang mengarah ke resource worker2
+
+### Konfigurasi Nginx pada salah satu Worker
+
+Tambahkan line berikut untuk mengizinkan directory listing
+
+- /etc/nginx/sites-available/jarkom-it07
+```
+location ~/worker2 {
+    autoindex on;
+}
+```
+
+Letakkan folder worker2 yang telah didownload dari [link berikut](https://drive.google.com/file/d/11S6CzcvLG-dB0ws1yp494IURnDvtIOcq/view?usp=drive_link) pada `/var/www/jarkom-it07`
+
+### Pengujian pada Client
+![19 1](./pictures/soal19_1.png)
+![19 2](./pictures/soal19_2.png)
+
+
 ## No. 20
 
 Berikut merupakan penyelesaian Soal Nomor 20 yang sebelumnya tidak sempat dikerjakan
+
+### Soal
+
+Worker tersebut harus dapat di akses dengan tamat.xxx.com dengan alias www.tamat.xxx.com
+
+### konfigurasi pada Pochinki
+
+Masukkan konfigurasi zone tamat baru pada file berikut
+
+- /etc/bind/named.conf.local
+```
+zone "tamat.it07.com" {
+        type master;
+        file "/etc/bind/it07/tamat.it07.com";
+};
+```
+
+Buat file baru `tamat.it07.com` laluu isi konfigurasi berikut
+
+- /etc/bind/it07/tamat.it07.com
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     tamat.it07.com. root.tamat.it07.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@             IN      NS      tamat.it07.com.
+@             IN      A       10.67.1.4 ; IP worker dari no19
+www           IN      CNAME   tamat.it07.com.
+```
+
+### Pengujian pada client
+
+![20 1](./pictures/soal20_1.png)
+![20 2](./pictures/soal20_2.png)
