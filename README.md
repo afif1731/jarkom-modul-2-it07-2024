@@ -1,4 +1,13 @@
-# Keperluan Copyable
+# Lapres Kelompok IT07
+
+| Anggota           | NRP        |
+| ----------------- | ---------- |
+| Muhammad Afif     | 5027221032 |
+| Alma Amira Dewani | 5027221054 |
+
+## Topologi
+
+![topologi](./img/topologi.png)
 
 ## No.1
 
@@ -463,6 +472,10 @@ www         IN      CNAME   siren.redzone.it07.com.
 
 ## No. 10
 
+### soal
+
+Markas juga meminta catatan kapan saja pesawat tempur tersebut menjatuhkan bom, maka buatlah subdomain baru di subdomain siren yaitu log.siren.redzone.xxxx.com serta aliasnya www.log.siren.redzone.xxxx.com yang juga mengarah ke Severny
+
 - tambahkan ini di georgopol /etc/bind/it07/siren.redzone.it07.com
 
 ```
@@ -470,7 +483,17 @@ log         IN      A       10.67.1.2 ; IP Serverny
 www.log     IN      CNAME   log.siren.redzone.it07.com.
 ```
 
+### Output
+
+![nomor10](./img/no.10-1.png)
+
+![nomor10.1](./img/no.10-2.png)
+
 ## No.11
+
+### soal
+
+Setelah pertempuran mereda, warga Erangel dapat kembali mengakses jaringan luar, tetapi hanya warga Pochinki saja yang dapat mengakses jaringan luar secara langsung. Buatlah konfigurasi agar warga Erangel yang berada diluar Pochinki dapat mengakses jaringan luar melalui DNS Server Pochinki
 
 - comment bagian ini di Pochinki /etc/bind/named.conf.options
 
@@ -486,17 +509,21 @@ forwarders {
 };
 ```
 
+### Output
+
+![nomor11](./img/no.11.png)
+
 ## No.12
+
+### Soal
+
+Karena pusat ingin sebuah website yang ingin digunakan untuk memantau kondisi markas lainnya maka deploy lah webiste ini (cek resource yg lb) pada severny menggunakan apache
 
 - instalasi kebutuhan
 
 ```
 apt-get update
-apt-get install lynx
-apt-get install apache2
-apt-get install php
-apt-get install libapache2-mod-php7.0
-apt-get install nginx -y
+apt-get install lynx apache2 php libapache2-mod-php7.0 nginx -y
 ```
 
 - masuk ke /etc/apache2/sites-available lalu copy file defaultnya
@@ -505,13 +532,9 @@ apt-get install nginx -y
 cp 000-default.conf jarkom-it07.conf
 ```
 
-- ubah isi filenya
+- ubah isi filenya jarkom-it07.conf
 
-```
-nano jarkom-it07.conf
-```
-
-ubah bagian ini saja
+Hanya ubah bagian ini saja
 
 ```
 <VirtualHost *:8080> #ubah portnya menjadi 8080
@@ -520,7 +543,7 @@ ServerAdmin webmaster@localhost
 DocumentRoot /var/www/jarkom-it07 #ubah document rootnya
 ```
 
-- Tambahkan port 8080 pada file ports.conf di directory /etc/apache2
+- Tambahkan port 8080 di /etc/apache2/ports,conf
 
 ```
 Listen 8080
@@ -566,7 +589,13 @@ echo "Tanggal saat ini: $date<br>";
 lynx http://10.67.1.2:8080
 ```
 
+### Output
+
+![nomor12](./img/no.12.png)
+
 ## No.13
+
+Tapi pusat merasa tidak puas dengan performanya karena traffic yag tinggi maka pusat meminta kita memasang load balancer pada web nya, dengan Severny, Stalber, Lipovka sebagai worker dan Mylta sebagai Load Balancer menggunakan apache sebagai web server nya dan load balancernya
 
 ### Web-server
 
@@ -638,58 +667,28 @@ a2ensite jarkom-it07.conf
 service apache2 restart
 ```
 
+### Output
+
 ## No.14
+
+Mereka juga belum merasa puas jadi pusat meminta agar web servernya dan load balancer nya diubah menjadi nginx
 
 ### Load Balancer
 
-instal juga di web worker sesuai kebutuhan
-
-- instalasi kebutuhan
+- Instalasi dependensi
 
 ```
 apt-get update
-apt-get install dnsutils -y
-apt-get install lynx -y
-apt-get install nginx -y
-apt-get install apache2 -y
-apt-get install libapache2-mod-php7.0
-apt-get install wget -y
-apt-get install unzip -y
-apt-get install php -y
-apt-get install php-fpm -y
+apt-get install lynx apache2 php libapache2-mod-php7.0 nginx -y php -y php-fpm -y
 ```
 
-- atur port dengan menambahkan line berikut di /etc/apache2/ports.conf
-
-```
-Listen 8080
-```
-
-- Aktifkan konfigurasi
-
-```
-a2ensite jarkom-it07.conf
-```
-
-- Restart apache
-
-```
-service apache2 restart
-```
-
-- Matikan apache
-
-```
-service apache2 stop
-```
-
-- jalankan nginx
+- Jalankan nginx
 
 ```
 service nginx start
 ```
 
-- masukan konfigurasi load balancer ke /etc/nginx/sites-available/jarkom-it07
+- Masukan konfigurasi load balancer ke /etc/nginx/sites-available/jarkom-it07
 
 ```
 upstream myita {
@@ -708,7 +707,7 @@ server {
 }
 ```
 
-- Menajalankan symlink
+- Menjalankan symlink
 
 ```
 ln -s /etc/nginx/sites-available/jarkom-it07 /etc/nginx/sites-enabled
@@ -728,58 +727,16 @@ service nginx restart
 
 ### Web Worker
 
-- atur port dengan menambahkan line berikut di /etc/apache2/ports.conf
+- Pastikan sudah mensetting port 8080
+- Pastikan juga sudah menambahkan index.php di /var/www/jarkom-it07
 
-```
-Listen 8080
-```
-
-- Aktifkan konfigurasi
-
-```
-a2ensite jarkom-it07.conf
-```
-
-- Restart apache
-
-```
-service apache2 restart
-```
-
-- Matikan apache
-
-```
-service apache2 stop
-```
-
-- jalankan nginx
+- Jalankan nginx
 
 ```
 service nginx start
 ```
 
-- masukan index.php di /var/www/jarkom-it07
-
-```
-mkdir /var/www/jarkom-it07
-
-<?php
-$hostname = gethostname();
-$date = date('Y-m-d H:i:s');
-$php_version = phpversion();
-$username = get_current_user();
-
-
-
-echo "Hello World!<br>";
-echo "Saya adalah: $username<br>";
-echo "Saat ini berada di: $hostname<br>";
-echo "Versi PHP yang saya gunakan: $php_version<br>";
-echo "Tanggal saat ini: $date<br>";
-?>
-```
-
-- buat konfigurasi di /etc/nginx/sites-available/jarkom-it07
+- Buat konfigurasi di /etc/nginx/sites-available/jarkom-it07
 
 ```
 server {
@@ -832,21 +789,38 @@ service nginx restart
 service php7.0-fpm start
 ```
 
+### Output
+
+![nomor14.1](./img/no.14-1.png)
+
+![nomor14.2](./img/no.14-2.png)
+
+![nomor14.3](./img/no.14-3.png)
+
+![nomor14.4](./img/no.14-4.png)
+
+![nomor14.5](./img/no.14-5.png)
+
+![nomor14.6](./img/no.14-6.png)
+
 ## No. 15
 
 ### Client
 
 - pastikan install apache benchmark
+
 ```
 apt-get install apache2-utils
 ```
 
 - Jalankan perintah ini
+
 ```
 ab -n 200 -c 10 http://10.67.2.3/
 ```
-+ `n`: jumlah request yang akan dikirim
-+ `c`: concurrency, jumlah request dalam satu pengiriman
+
+- `n`: jumlah request yang akan dikirim
+- `c`: concurrency, jumlah request dalam satu pengiriman
 
 ```
 This is ApacheBench, Version 2.3 <$Revision: 1706008 $>
@@ -901,21 +875,25 @@ Percentage of the requests served within a certain time (ms)
 - Ubah Load balancer pada `myIta`, lalu jalankan command yang sama lagi
 
 - Round-Robin
+
 ```
 # nda perlu tambahkan apa-apa
 ```
 
 - Least-connection
+
 ```
 least_conn;
 ```
 
 - IP Hash
+
 ```
 ip_hash;
 ```
 
 - Generic Hash
+
 ```
 hash $request_uri consistent;
 ```
@@ -925,6 +903,7 @@ hash $request_uri consistent;
 ### di pochinki
 
 - tambahkan ini pada /etc/bind/named.conf.local
+
 ```
 one "myIta.it07.com" {
     type master;
@@ -941,6 +920,7 @@ zone "2.67.10.in-addr.arpa" {
 ```
 
 - ini pada /etc/bind/it07/myIta.it07.com
+
 ```
 ;
 ; BIND data file for local loopback interface
@@ -959,6 +939,7 @@ www           IN      CNAME   myIta.it07.com.
 ```
 
 - ini pada /etc/bind/it07/2.67.10.in-addr.arpa
+
 ```
 ;
 ; BIND data file for local loopback interface
@@ -978,6 +959,7 @@ $TTL    604800
 ## No. 17
 
 - masukkan pada nginx myIta
+
 ```
 upstream myita {
     server 10.67.1.3:8080; #stabler
