@@ -1038,7 +1038,7 @@ Percentage of the requests served within a certain time (ms)
 - Round-Robin
 
 ```
-# nda perlu tambahkan apa-apa
+# tidak perlu tambahkan apa-apa
 ```
 
 - Least-connection
@@ -1060,6 +1060,10 @@ hash $request_uri consistent;
 ```
 
 ## No. 16 dan 18
+
+Karena dirasa kurang aman karena masih memakai IP, markas ingin akses ke mylta memakai mylta.xxx.com dengan alias www.mylta.xxx.com
+
+Apa bila ada yang mencoba mengakses IP mylta akan secara otomatis dialihkan ke www.mylta.xxx.com
 
 ### di pochinki
 
@@ -1117,7 +1121,19 @@ $TTL    604800
 3                        IN      PTR     www.myIta.it07.com.
 ```
 
+### Output 16
+
+![nomor16.1](./img/no.16-1.jpg)
+
+![nomor16.2](./img/no.16-2.jpg)
+
+### Output 18
+
+![nomor18](./img/no.18.jpg)
+
 ## No. 17
+
+Agar aman, buatlah konfigurasi agar mylta.xxx.com hanya dapat diakses melalui port 14000 dan 14400.
 
 - masukkan pada nginx myIta
 
@@ -1139,6 +1155,14 @@ server {
 }
 " > /etc/nginx/sites-available/jarkom-it07
 ```
+
+### Output
+
+![nomor17.1](./img/no.17-1.jpg)
+
+![nomor17.2](./img/no.17-2.jpg)
+
+<br>
 
 # Revisi
 
